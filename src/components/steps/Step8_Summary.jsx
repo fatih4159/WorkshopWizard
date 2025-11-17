@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { FileText, Download, Mail, Printer } from 'lucide-react'
 import Card from '../ui/Card'
 import Button from '../ui/Button'
+import StepBanner from '../StepBanner'
 import { useWorkshop } from '../../context/WorkshopContext'
 import { useToast } from '../ui/Toast'
 import { PACKAGES } from '../../utils/constants'
@@ -53,13 +54,18 @@ const Step8_Summary = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h2 className="text-3xl font-bold text-neutral-900">Workshop-Zusammenfassung</h2>
-        <p className="mt-2 text-neutral-600">
-          Ihre vollständige Workshop-Dokumentation und Export-Optionen.
-        </p>
-      </div>
+      {/* Welcome Banner */}
+      <StepBanner
+        title="Workshop-Zusammenfassung"
+        emoji="🎉"
+        description="Geschafft! Hier ist Ihre vollständige Analyse."
+        steps={[
+          'Überprüfen Sie alle wichtigen Kennzahlen',
+          'Exportieren Sie den professionellen PDF-Report',
+          'Oder nutzen Sie JSON/CSV für eigene Auswertungen',
+          'Teilen Sie die Ergebnisse mit Ihrem Team'
+        ]}
+      />
 
       {/* Customer Info */}
       <Card title="Kundeninformationen">

@@ -4,6 +4,7 @@ import Card from '../ui/Card'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 import Button from '../ui/Button'
+import StepBanner from '../StepBanner'
 import { useWorkshop } from '../../context/WorkshopContext'
 import { COMPLEXITY_LEVELS, CONFIDENCE_LEVELS } from '../../utils/constants'
 import { getTopProcesses, calculateTimePerYear } from '../../utils/calculations'
@@ -46,13 +47,18 @@ const Step4_AutomationScenarios = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h2 className="text-3xl font-bold text-neutral-900">Automatisierungsszenarien</h2>
-        <p className="mt-2 text-neutral-600">
-          Definieren Sie, wie die Top-5-Prozesse automatisiert werden können.
-        </p>
-      </div>
+      {/* Welcome Banner */}
+      <StepBanner
+        title="Automatisierungsszenarien"
+        emoji="⚡"
+        description="Wie können Ihre Prozesse automatisiert werden?"
+        steps={[
+          'Wir zeigen Ihnen die Top-5 Prozesse mit höchster Priorität',
+          'Beschreiben Sie den SOLL-Zustand (wie soll es automatisiert laufen?)',
+          'Schätzen Sie die Zeitersparnis mit dem Slider',
+          'Bewerten Sie Komplexität und Sicherheit'
+        ]}
+      />
 
       {topProcesses.length > 0 ? (
         <div className="space-y-6">

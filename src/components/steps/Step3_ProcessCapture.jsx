@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { ListChecks, Plus, Trash2, Edit2, ChevronDown, ChevronUp } from 'lucide-react'
+import { ListChecks, Plus, Trash2, Edit2, ChevronDown, ChevronUp, Info, CheckCircle } from 'lucide-react'
 import Card from '../ui/Card'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 import Button from '../ui/Button'
+import StepBanner from '../StepBanner'
 import { useWorkshop } from '../../context/WorkshopContext'
 import { DEPARTMENTS, FREQUENCIES, ERROR_LEVELS, AUTOMATABLE_LEVELS } from '../../utils/constants'
 import { calculateTimePerWeek, calculateTimePerYear, calculateProcessScore, getScoreBadge, getScoreColor } from '../../utils/calculations'
@@ -99,23 +100,43 @@ const Step3_ProcessCapture = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h2 className="text-3xl font-bold text-neutral-900">Prozess-Erfassung</h2>
-        <p className="mt-2 text-neutral-600">
-          Erfassen Sie alle manuellen Geschäftsprozesse, die automatisiert werden könnten.
-        </p>
+      {/* Welcome Banner */}
+      <StepBanner
+        title="Prozess-Erfassung"
+        emoji="📋"
+        description="Welche manuellen Prozesse laufen in Ihrem Unternehmen?"
+        steps={[
+          'Klicken Sie auf "Neuen Prozess erfassen"',
+          'Beschreiben Sie den aktuellen Ablauf (IST-Zustand)',
+          'Bewerten Sie Zeitaufwand und Automatisierbarkeit',
+          'Erfassen Sie 3-5 wichtige Prozesse für beste Ergebnisse'
+        ]}
+      />
+
+      {/* Progress Indicator */}
+      <div className="flex items-center gap-4">
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${processes.length >= 3 ? 'bg-green-50 text-success' : 'bg-neutral-100 text-neutral-500'}`}>
+          {processes.length >= 3 ? <CheckCircle className="w-5 h-5" /> : <div className="w-5 h-5 rounded-full border-2 border-current" />}
+          <span className="font-medium text-sm">{processes.length} Prozesse erfasst</span>
+        </div>
+        {processes.length >= 3 && (
+          <div className="text-sm text-success font-medium">✓ Genug für gute Analyse!</div>
+        )}
       </div>
 
       {/* Add Process Button */}
-      <div>
-        <Button
-          onClick={() => setShowForm(!showForm)}
-          icon={showForm ? ChevronUp : Plus}
-        >
-          {showForm ? 'Formular schließen' : 'Neuen Prozess erfassen'}
-        </Button>
-      </div>
+      {!showForm && (
+        <div>
+          <Button
+            onClick={() => setShowForm(true)}
+            icon={Plus}
+            size="lg"
+            fullWidth
+          >
+            + Neuen Prozess erfassen
+          </Button>
+        </div>
+      )}
 
       {/* Add/Edit Process Form */}
       {showForm && (

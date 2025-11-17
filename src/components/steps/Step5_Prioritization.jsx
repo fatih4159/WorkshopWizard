@@ -1,6 +1,7 @@
 import React from 'react'
 import { BarChart3 } from 'lucide-react'
 import Card from '../ui/Card'
+import StepBanner from '../StepBanner'
 import { useWorkshop } from '../../context/WorkshopContext'
 import { sortProcessesByScore, calculateTimePerWeek, calculateTimePerYear, getScoreBadge, getScoreColor } from '../../utils/calculations'
 
@@ -12,13 +13,18 @@ const Step5_Prioritization = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h2 className="text-3xl font-bold text-neutral-900">Priorisierung</h2>
-        <p className="mt-2 text-neutral-600">
-          Automatische Bewertung und Ranking aller erfassten Prozesse nach Automatisierungspotenzial.
-        </p>
-      </div>
+      {/* Welcome Banner */}
+      <StepBanner
+        title="Priorisierung"
+        emoji="📊"
+        description="Welche Prozesse haben das größte Automatisierungspotenzial?"
+        steps={[
+          'Wir haben Ihre Prozesse automatisch bewertet (Score 0-12)',
+          'Prozesse mit hohem Score = hohe Priorität',
+          'Top 5 sind die wichtigsten Kandidaten',
+          'Berücksichtigt: Häufigkeit, Zeitaufwand, Fehleranfälligkeit, Automatisierbarkeit'
+        ]}
+      />
 
       {sortedProcesses.length > 0 ? (
         <>

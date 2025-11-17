@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { TrendingUp, DollarSign, Calendar } from 'lucide-react'
 import Card from '../ui/Card'
 import Input from '../ui/Input'
+import StepBanner from '../StepBanner'
 import { useWorkshop } from '../../context/WorkshopContext'
 import { calculateROI, formatCurrency, formatNumber } from '../../utils/calculations'
 import { DEFAULT_HOURLY_RATE, PACKAGES } from '../../utils/constants'
@@ -22,13 +23,18 @@ const Step6_ROICalculation = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h2 className="text-3xl font-bold text-neutral-900">ROI-Berechnung</h2>
-        <p className="mt-2 text-neutral-600">
-          Automatische Berechnung des Return on Investment für die geplanten Automatisierungen.
-        </p>
-      </div>
+      {/* Welcome Banner */}
+      <StepBanner
+        title="ROI-Berechnung"
+        emoji="💰"
+        description="Wie rentabel ist die Automatisierung?"
+        steps={[
+          'Wir berechnen automatisch 3 Szenarien (Best/Average/Worst Case)',
+          'Passen Sie den Stundensatz an (Standard: 45€)',
+          'Sehen Sie Zeitersparnis, Kosteneinsparung und Amortisation',
+          'ROI = Return on Investment in Prozent'
+        ]}
+      />
 
       {automationScenarios.length > 0 ? (
         <>

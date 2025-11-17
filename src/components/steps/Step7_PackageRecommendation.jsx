@@ -2,6 +2,7 @@ import React from 'react'
 import { Package, Check } from 'lucide-react'
 import Card from '../ui/Card'
 import Button from '../ui/Button'
+import StepBanner from '../StepBanner'
 import { useWorkshop } from '../../context/WorkshopContext'
 import { PACKAGES } from '../../utils/constants'
 import { calculateRequiredWorkflows, recommendPackage, formatCurrency } from '../../utils/calculations'
@@ -19,13 +20,18 @@ const Step7_PackageRecommendation = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h2 className="text-3xl font-bold text-neutral-900">Paket-Empfehlung</h2>
-        <p className="mt-2 text-neutral-600">
-          Basierend auf Ihren Anforderungen empfehlen wir das passende Cynefa-Paket.
-        </p>
-      </div>
+      {/* Welcome Banner */}
+      <StepBanner
+        title="Paket-Empfehlung"
+        emoji="📦"
+        description="Welches Cynefa-Paket passt zu Ihnen?"
+        steps={[
+          'Wir empfehlen automatisch das passende Paket',
+          'Basierend auf der Anzahl benötigter Workflows',
+          'Klicken Sie auf ein Paket, um es auszuwählen',
+          'Vergleichen Sie Features und Preise'
+        ]}
+      />
 
       {automationScenarios.length > 0 ? (
         <>
