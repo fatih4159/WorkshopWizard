@@ -1,239 +1,235 @@
 import React, { useState } from 'react'
-import { Wrench, Plus, Trash2, Edit2, Search } from 'lucide-react'
+import { Wrench, Plus, Trash2, CheckCircle, Info, Zap } from 'lucide-react'
 import Card from '../ui/Card'
 import Input from '../ui/Input'
-import Select from '../ui/Select'
 import Button from '../ui/Button'
 import { useWorkshop } from '../../context/WorkshopContext'
-import { TOOL_CATEGORIES, FREQUENCIES, POPULAR_TOOLS } from '../../utils/constants'
+import { POPULAR_TOOLS } from '../../utils/constants'
 
 const Step2_ToolLandscape = () => {
   const { state, dispatch, Actions } = useWorkshop()
   const { tools } = state
 
-  const [newTool, setNewTool] = useState({
-    name: '',
-    category: '',
-    department: '',
-    frequency: 'Täglich',
-    hasAPI: true
-  })
+  const [showCustomForm, setShowCustomForm] = useState(false)
+  const [customToolName, setCustomToolName] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('Alle')
 
-  const [searchTerm, setSearchTerm] = useState('')
-  const [editingId, setEditingId] = useState(null)
+  const handleQuickAddTool = (tool) => {
+    // Check if tool already exists
+    const exists = tools.some(t => t.name.toLowerCase() === tool.name.toLowerCase())
+    if (exists) return
 
-  const handleAddTool = () => {
-    if (newTool.name.trim() && newTool.category) {
-      dispatch({ type: Actions.ADD_TOOL, payload: newTool })
-      setNewTool({
-        name: '',
-        category: '',
-        department: '',
+    dispatch({
+      type: Actions.ADD_TOOL,
+      payload: {
+        name: tool.name,
+        category: tool.category,
         frequency: 'Täglich',
-        hasAPI: true
-      })
-    }
+        hasAPI: tool.hasAPI,
+        department: ''
+      }
+    })
   }
 
-  const handleSelectPopularTool = (tool) => {
-    setNewTool({
-      ...newTool,
-      name: tool.name,
-      category: tool.category,
-      hasAPI: tool.hasAPI
+  const handleAddCustomTool = () => {
+    if (!customToolName.trim()) return
+
+    dispatch({
+      type: Actions.ADD_TOOL,
+      payload: {
+        name: customToolName,
+        category: 'Andere',
+        frequency: 'Täglich',
+        hasAPI: false,
+        department: ''
+      }
     })
+    setCustomToolName('')
+    setShowCustomForm(false)
   }
 
   const handleRemoveTool = (id) => {
     dispatch({ type: Actions.REMOVE_TOOL, payload: id })
   }
 
-  const filteredPopularTools = POPULAR_TOOLS.filter(tool =>
-    tool.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const isToolAdded = (toolName) => {
+    return tools.some(t => t.name.toLowerCase() === toolName.toLowerCase())
+  }
+
+  // Group tools by category
+  const categories = ['Alle', ...new Set(POPULAR_TOOLS.map(t => t.category))]
+  const filteredTools = selectedCategory === 'Alle'
+    ? POPULAR_TOOLS
+    : POPULAR_TOOLS.filter(t => t.category === selectedCategory)
+
+  const toolsProgress = tools.length
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h2 className="text-3xl font-bold text-neutral-900">Tool-Landscape</h2>
-        <p className="mt-2 text-neutral-600">
-          Erfassen Sie alle genutzten Software-Tools und Systeme im Unternehmen.
+      {/* Header with Info Banner */}
+      <div className="bg-gradient-to-r from-primary to-secondary text-white rounded-xl p-6 shadow-soft-lg">
+        <h2 className="text-3xl font-bold mb-2">Ihre Tool-Landscape 🛠️</h2>
+        <p className="text-lg opacity-90 mb-4">
+          Welche Software und Tools nutzen Sie in Ihrem Unternehmen?
         </p>
+        <div className="bg-white/10 rounded-lg p-4 backdrop-blur">
+          <p className="text-sm font-medium mb-2">So geht's:</p>
+          <ol className="text-sm space-y-1 opacity-90">
+            <li>1️⃣ Klicken Sie auf Tools, die Sie nutzen (grün = ausgewählt)</li>
+            <li>2️⃣ Oder fügen Sie eigene Tools hinzu</li>
+            <li>3️⃣ Weiter zum nächsten Schritt (min. 2-3 Tools empfohlen)</li>
+          </ol>
+        </div>
       </div>
 
-      {/* Add Tool Card */}
-      <Card title="Neues Tool hinzufügen">
-        {/* Popular Tools Quick Select */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-neutral-700 mb-2">
-            Schnellauswahl (beliebte Tools)
-          </label>
-          <Input
-            placeholder="Tool suchen..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            icon={Search}
-          />
-          {searchTerm && (
-            <div className="mt-2 max-h-48 overflow-y-auto border border-neutral-200 rounded-lg">
-              {filteredPopularTools.slice(0, 10).map((tool, index) => (
-                <button
-                  key={index}
-                  className="w-full text-left px-4 py-2 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0"
-                  onClick={() => {
-                    handleSelectPopularTool(tool)
-                    setSearchTerm('')
-                  }}
-                >
-                  <div className="font-medium">{tool.name}</div>
-                  <div className="text-xs text-neutral-500">
-                    {tool.category} • {tool.hasAPI ? 'API verfügbar' : 'Keine API'}
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+      {/* Progress Indicator */}
+      <div className="flex items-center gap-4">
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${toolsProgress >= 3 ? 'bg-green-50 text-success' : 'bg-neutral-100 text-neutral-500'}`}>
+          {toolsProgress >= 3 ? <CheckCircle className="w-5 h-5" /> : <div className="w-5 h-5 rounded-full border-2 border-current" />}
+          <span className="font-medium text-sm">{toolsProgress} Tools erfasst</span>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Tool-Name"
-            value={newTool.name}
-            onChange={(e) => setNewTool({ ...newTool, name: e.target.value })}
-            placeholder="z.B. Shopify"
-            required
-          />
-
-          <Select
-            label="Kategorie"
-            value={newTool.category}
-            onChange={(e) => setNewTool({ ...newTool, category: e.target.value })}
-            options={TOOL_CATEGORIES}
-            required
-          />
-
-          <Input
-            label="Hauptnutzer (Abteilung)"
-            value={newTool.department}
-            onChange={(e) => setNewTool({ ...newTool, department: e.target.value })}
-            placeholder="z.B. Vertrieb"
-          />
-
-          <Select
-            label="Nutzungshäufigkeit"
-            value={newTool.frequency}
-            onChange={(e) => setNewTool({ ...newTool, frequency: e.target.value })}
-            options={FREQUENCIES}
-          />
-
-          <div className="flex items-center gap-2 col-span-full">
-            <input
-              type="checkbox"
-              id="hasAPI"
-              checked={newTool.hasAPI}
-              onChange={(e) => setNewTool({ ...newTool, hasAPI: e.target.checked })}
-              className="w-4 h-4 text-primary border-neutral-300 rounded focus:ring-primary"
-            />
-            <label htmlFor="hasAPI" className="text-sm font-medium text-neutral-700">
-              API verfügbar
-            </label>
-          </div>
-        </div>
-
-        <Button
-          onClick={handleAddTool}
-          icon={Plus}
-          disabled={!newTool.name.trim() || !newTool.category}
-          className="mt-4"
-        >
-          Tool hinzufügen
-        </Button>
-      </Card>
-
-      {/* Tools List */}
+      {/* Selected Tools Summary */}
       {tools.length > 0 && (
-        <Card title={`Erfasste Tools (${tools.length})`}>
-          <div className="space-y-2">
+        <Card title={`✅ Ihre ausgewählten Tools (${tools.length})`}>
+          <div className="flex flex-wrap gap-2">
             {tools.map((tool) => (
               <div
                 key={tool.id}
-                className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg border border-neutral-200 hover:shadow-soft transition-shadow"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-50 to-green-100 border-2 border-success rounded-lg"
               >
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <Wrench className="w-5 h-5 text-primary" />
-                    <div>
-                      <h4 className="font-semibold text-neutral-900">{tool.name}</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs px-2 py-1 bg-primary-50 text-primary rounded">
-                          {tool.category}
-                        </span>
-                        <span className="text-xs text-neutral-500">
-                          {tool.frequency}
-                        </span>
-                        {tool.department && (
-                          <span className="text-xs text-neutral-500">
-                            • {tool.department}
-                          </span>
-                        )}
-                        {tool.hasAPI && (
-                          <span className="text-xs px-2 py-1 bg-green-50 text-success rounded">
-                            API
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  icon={Trash2}
+                <Wrench className="w-4 h-4 text-success" />
+                <span className="font-medium text-neutral-900">{tool.name}</span>
+                <button
                   onClick={() => handleRemoveTool(tool.id)}
-                  ariaLabel={`${tool.name} entfernen`}
-                />
+                  className="ml-2 text-neutral-500 hover:text-error transition-colors"
+                  aria-label={`${tool.name} entfernen`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             ))}
           </div>
+          {tools.length >= 3 && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-success" />
+              <span className="text-sm text-success font-medium">Super! Sie können zum nächsten Schritt.</span>
+            </div>
+          )}
         </Card>
       )}
 
+      {/* Quick Select Tools */}
+      <Card
+        title={
+          <div className="flex items-center gap-2">
+            <Zap className="w-6 h-6 text-primary" />
+            <span>Beliebte Tools (Klicken zum Hinzufügen)</span>
+          </div>
+        }
+      >
+        {/* Category Filter */}
+        <div className="mb-4">
+          <div className="flex flex-wrap gap-2">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                  selectedCategory === cat
+                    ? 'bg-primary text-white'
+                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tool Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {filteredTools.map((tool, index) => {
+            const added = isToolAdded(tool.name)
+            return (
+              <button
+                key={index}
+                onClick={() => !added && handleQuickAddTool(tool)}
+                disabled={added}
+                className={`p-4 rounded-lg border-2 text-center transition-all ${
+                  added
+                    ? 'bg-green-50 border-success cursor-not-allowed'
+                    : 'bg-white border-neutral-200 hover:border-primary hover:shadow-soft cursor-pointer'
+                }`}
+              >
+                {added && <CheckCircle className="w-5 h-5 text-success mx-auto mb-1" />}
+                <div className="font-semibold text-sm text-neutral-900">{tool.name}</div>
+                <div className="text-xs text-neutral-500 mt-1">{tool.category}</div>
+              </button>
+            )
+          })}
+        </div>
+      </Card>
+
+      {/* Custom Tool Section */}
+      <Card title="Tool nicht gefunden?">
+        {!showCustomForm ? (
+          <Button
+            onClick={() => setShowCustomForm(true)}
+            icon={Plus}
+            variant="outline"
+            fullWidth
+          >
+            Eigenes Tool hinzufügen
+          </Button>
+        ) : (
+          <div className="space-y-4 p-4 bg-neutral-50 rounded-lg border-2 border-dashed border-neutral-300">
+            <Input
+              label="Tool-Name"
+              value={customToolName}
+              onChange={(e) => setCustomToolName(e.target.value)}
+              placeholder="z.B. Mein individuelles Tool"
+              autoFocus
+            />
+            <div className="flex gap-3">
+              <Button
+                onClick={handleAddCustomTool}
+                icon={Plus}
+                disabled={!customToolName.trim()}
+              >
+                Hinzufügen
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowCustomForm(false)
+                  setCustomToolName('')
+                }}
+                variant="outline"
+              >
+                Abbrechen
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Help Section */}
       {tools.length === 0 && (
         <Card>
-          <div className="text-center py-12 text-neutral-500">
-            <Wrench className="w-16 h-16 mx-auto mb-4 opacity-30" />
-            <p>Noch keine Tools erfasst. Fügen Sie Tools hinzu, um zu beginnen.</p>
-          </div>
-        </Card>
-      )}
-
-      {/* Summary */}
-      {tools.length > 0 && (
-        <Card title="Statistik">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-primary-50 rounded-lg">
-              <div className="text-3xl font-bold text-primary">{tools.length}</div>
-              <div className="text-sm text-neutral-600">Gesamt Tools</div>
-            </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-3xl font-bold text-success">
-                {tools.filter(t => t.hasAPI).length}
+          <div className="p-6 bg-blue-50 border-l-4 border-primary rounded">
+            <div className="flex gap-3">
+              <Info className="w-6 h-6 text-primary flex-shrink-0" />
+              <div>
+                <h4 className="font-semibold text-neutral-900 mb-2">Tipp: Welche Tools sind wichtig?</h4>
+                <ul className="text-sm text-neutral-700 space-y-1">
+                  <li>• CRM-Systeme (z.B. HubSpot, Salesforce)</li>
+                  <li>• E-Mail & Kommunikation (z.B. Gmail, Outlook)</li>
+                  <li>• Buchhaltung (z.B. Lexoffice, DATEV)</li>
+                  <li>• E-Commerce Plattformen (z.B. Shopify)</li>
+                  <li>• Projektmanagement (z.B. Asana, Trello)</li>
+                </ul>
               </div>
-              <div className="text-sm text-neutral-600">Mit API</div>
-            </div>
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-3xl font-bold text-blue-600">
-                {tools.filter(t => t.frequency === 'Täglich').length}
-              </div>
-              <div className="text-sm text-neutral-600">Täglich genutzt</div>
-            </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <div className="text-3xl font-bold text-purple-600">
-                {new Set(tools.map(t => t.category)).size}
-              </div>
-              <div className="text-sm text-neutral-600">Kategorien</div>
             </div>
           </div>
         </Card>
