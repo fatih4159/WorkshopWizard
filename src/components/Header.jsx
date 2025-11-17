@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Save, Download, Upload, Trash2, HelpCircle } from 'lucide-react'
+import { Save, Download, Upload, Trash2, HelpCircle, Settings } from 'lucide-react'
 import Button from './ui/Button'
+import SettingsModal from './ui/SettingsModal'
 import { useWorkshop } from '../context/WorkshopContext'
 import { exportAsJSON, importFromJSON, clearStorage } from '../utils/storage'
 import { useToast } from './ui/Toast'
@@ -10,6 +11,7 @@ const Header = () => {
   const { state, dispatch, Actions } = useWorkshop()
   const { showToast } = useToast()
   const [saveStatus, setSaveStatus] = useState('saved') // 'saving', 'saved', 'unsaved', 'error'
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
 
   // Auto-save indicator
   useEffect(() => {
@@ -157,6 +159,17 @@ const Header = () => {
               Zurücksetzen
             </Button>
 
+            {/* Settings */}
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={Settings}
+              ariaLabel="Einstellungen"
+              onClick={() => setShowSettingsModal(true)}
+            >
+              Einstellungen
+            </Button>
+
             {/* Help */}
             <Button
               variant="ghost"
@@ -170,6 +183,12 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+      />
     </header>
   )
 }

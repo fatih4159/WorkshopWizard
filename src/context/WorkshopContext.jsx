@@ -21,6 +21,7 @@ const initialState = {
   hourlyRate: 45,
   notes: '',
   actionItems: [],
+  customPackages: null, // null means use default packages from constants.js
   history: [],
   historyIndex: 0
 }
@@ -44,6 +45,7 @@ const Actions = {
   ADD_ACTION_ITEM: 'ADD_ACTION_ITEM',
   UPDATE_ACTION_ITEM: 'UPDATE_ACTION_ITEM',
   REMOVE_ACTION_ITEM: 'REMOVE_ACTION_ITEM',
+  SET_CUSTOM_PACKAGES: 'SET_CUSTOM_PACKAGES',
   LOAD_DATA: 'LOAD_DATA',
   RESET_DATA: 'RESET_DATA',
   UNDO: 'UNDO',
@@ -155,6 +157,9 @@ const workshopReducer = (state, action) => {
         ...state,
         actionItems: state.actionItems.filter(item => item.id !== action.payload)
       }
+
+    case Actions.SET_CUSTOM_PACKAGES:
+      return { ...state, customPackages: action.payload }
 
     case Actions.LOAD_DATA:
       return { ...action.payload, history: [action.payload], historyIndex: 0 }
