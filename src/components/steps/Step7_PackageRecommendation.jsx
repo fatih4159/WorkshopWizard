@@ -8,7 +8,10 @@ import { calculateRequiredWorkflows, recommendPackage, formatCurrency } from '..
 
 const Step7_PackageRecommendation = () => {
   const { state, dispatch, Actions } = useWorkshop()
-  const { automationScenarios, selectedPackage } = state
+  const { automationScenarios, selectedPackage, customPackages } = state
+
+  // Use custom packages if available, otherwise use defaults
+  const packages = customPackages || PACKAGES
 
   const requiredWorkflows = calculateRequiredWorkflows(automationScenarios)
   const recommendedPackageId = recommendPackage(requiredWorkflows)
@@ -58,7 +61,7 @@ const Step7_PackageRecommendation = () => {
           {/* Package Comparison */}
           <Card title="Paket-Vergleich">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {PACKAGES.map((pkg) => {
+              {packages.map((pkg) => {
                 const isRecommended = pkg.id === recommendedPackageId
                 const isSelected = pkg.id === selectedPackage
                 const meetsRequirements = pkg.workflows >= requiredWorkflows
@@ -142,7 +145,7 @@ const Step7_PackageRecommendation = () => {
           {selectedPackage && (
             <Card title="Ihr ausgewähltes Paket">
               {(() => {
-                const pkg = PACKAGES.find(p => p.id === selectedPackage)
+                const pkg = packages.find(p => p.id === selectedPackage)
                 if (!pkg) return null
 
                 const estimatedWeeks = automationScenarios.reduce((total, s) => {

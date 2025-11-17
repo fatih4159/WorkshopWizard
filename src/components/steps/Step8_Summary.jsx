@@ -12,13 +12,16 @@ import { exportToPDF } from '../../utils/export'
 const Step8_Summary = () => {
   const { state } = useWorkshop()
   const { showToast } = useToast()
-  const { customer, processes, tools, automationScenarios, selectedPackage, hourlyRate } = state
+  const { customer, processes, tools, automationScenarios, selectedPackage, hourlyRate, customPackages } = state
+
+  // Use custom packages if available, otherwise use defaults
+  const packages = customPackages || PACKAGES
 
   const [isExporting, setIsExporting] = useState(false)
 
   const topProcesses = getTopProcesses(processes, 5)
   const requiredWorkflows = calculateRequiredWorkflows(automationScenarios)
-  const selectedPkg = PACKAGES.find(p => p.id === selectedPackage) || PACKAGES[1]
+  const selectedPkg = packages.find(p => p.id === selectedPackage) || packages[1]
   const roi = calculateROI(processes, automationScenarios, hourlyRate, selectedPkg.price)
 
   const handleExportPDF = async () => {

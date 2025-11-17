@@ -8,7 +8,10 @@ import { DEFAULT_HOURLY_RATE, PACKAGES } from '../../utils/constants'
 
 const Step6_ROICalculation = () => {
   const { state, dispatch, Actions } = useWorkshop()
-  const { processes, automationScenarios, hourlyRate, selectedPackage } = state
+  const { processes, automationScenarios, hourlyRate, selectedPackage, customPackages } = state
+
+  // Use custom packages if available, otherwise use defaults
+  const packages = customPackages || PACKAGES
 
   const [localHourlyRate, setLocalHourlyRate] = useState(hourlyRate || DEFAULT_HOURLY_RATE)
 
@@ -17,7 +20,7 @@ const Step6_ROICalculation = () => {
     dispatch({ type: Actions.SET_HOURLY_RATE, payload: value })
   }
 
-  const selectedPkg = PACKAGES.find(p => p.id === selectedPackage) || PACKAGES[1]
+  const selectedPkg = packages.find(p => p.id === selectedPackage) || packages[1]
   const roi = calculateROI(processes, automationScenarios, localHourlyRate, selectedPkg.price)
 
   return (
@@ -41,7 +44,7 @@ const Step6_ROICalculation = () => {
                 </label>
                 <input
                   type="range"
-                  min="30"
+                  min="5"
                   max="80"
                   step="5"
                   value={localHourlyRate}
@@ -49,7 +52,7 @@ const Step6_ROICalculation = () => {
                   className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer mb-2"
                 />
                 <div className="flex justify-between text-sm">
-                  <span className="text-neutral-500">€30</span>
+                  <span className="text-neutral-500">€5</span>
                   <span className="text-2xl font-bold text-primary font-mono">€{localHourlyRate}</span>
                   <span className="text-neutral-500">€80</span>
                 </div>
