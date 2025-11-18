@@ -5,9 +5,12 @@ import { AuthRequest } from '../middleware/auth.js';
 export class WorkshopController {
   static async create(req: AuthRequest, res: Response) {
     try {
+      console.log('📝 Create workshop request:', { userId: req.userId, body: req.body });
+
       const { title, data } = req.body;
 
       if (!title) {
+        console.log('❌ Missing title');
         return res.status(400).json({ error: 'Title is required' });
       }
 
@@ -27,11 +30,13 @@ export class WorkshopController {
         },
       });
 
+      console.log('💾 Creating workshop in database...');
       const workshop = await WorkshopModel.create(req.userId!, title, workshopData);
+      console.log('✅ Workshop created successfully:', workshop.id);
 
       res.status(201).json({ workshop });
     } catch (error) {
-      console.error('Create workshop error:', error);
+      console.error('❌ Create workshop error:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   }

@@ -37,13 +37,18 @@ export default function WorkshopList({ onSelectWorkshop }) {
 
     try {
       setCreating(true);
+      console.log('📝 Creating workshop with title:', newWorkshopTitle);
+
       const response = await workshopAPI.create(newWorkshopTitle);
+      console.log('✅ Workshop created:', response);
+
       setShowCreateModal(false);
       setNewWorkshopTitle('');
       onSelectWorkshop(response.workshop);
     } catch (error) {
-      console.error('Error creating workshop:', error);
-      alert('Fehler beim Erstellen des Workshops');
+      console.error('❌ Error creating workshop:', error);
+      console.error('Error details:', error.response?.data);
+      alert('Fehler beim Erstellen des Workshops: ' + (error.response?.data?.error || error.message));
     } finally {
       setCreating(false);
     }
