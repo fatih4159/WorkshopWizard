@@ -27,7 +27,7 @@ export class WorkshopController {
         },
       });
 
-      const workshop = WorkshopModel.create(req.userId!, title, workshopData);
+      const workshop = await WorkshopModel.create(req.userId!, title, workshopData);
 
       res.status(201).json({ workshop });
     } catch (error) {
@@ -38,7 +38,7 @@ export class WorkshopController {
 
   static async getAll(req: AuthRequest, res: Response) {
     try {
-      const workshops = WorkshopModel.findByUserId(req.userId!);
+      const workshops = await WorkshopModel.findByUserId(req.userId!);
 
       // Parse data for each workshop
       const workshopsWithParsedData = workshops.map(w => ({
@@ -61,14 +61,14 @@ export class WorkshopController {
         return res.status(400).json({ error: 'Invalid workshop ID' });
       }
 
-      const workshop = WorkshopModel.findByUserAndId(req.userId!, workshopId);
+      const workshop = await WorkshopModel.findByUserAndId(req.userId!, workshopId);
 
       if (!workshop) {
         return res.status(404).json({ error: 'Workshop not found' });
       }
 
       // Update last accessed time
-      WorkshopModel.updateLastAccessed(workshopId, req.userId!);
+      await WorkshopModel.updateLastAccessed(workshopId, req.userId!);
 
       res.json({
         workshop: {
@@ -99,7 +99,7 @@ export class WorkshopController {
       if (currentStep !== undefined) updateData.current_step = currentStep;
       if (isCompleted !== undefined) updateData.is_completed = isCompleted;
 
-      const workshop = WorkshopModel.update(workshopId, req.userId!, updateData);
+      const workshop = await WorkshopModel.update(workshopId, req.userId!, updateData);
 
       if (!workshop) {
         return res.status(404).json({ error: 'Workshop not found' });
@@ -125,7 +125,7 @@ export class WorkshopController {
         return res.status(400).json({ error: 'Invalid workshop ID' });
       }
 
-      const deleted = WorkshopModel.delete(workshopId, req.userId!);
+      const deleted = await WorkshopModel.delete(workshopId, req.userId!);
 
       if (!deleted) {
         return res.status(404).json({ error: 'Workshop not found' });

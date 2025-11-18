@@ -18,14 +18,14 @@ export class AuthController {
       }
 
       // Check if user already exists
-      const existingUser = UserModel.findByEmail(email);
+      const existingUser = await UserModel.findByEmail(email);
       if (existingUser) {
         return res.status(409).json({ error: 'Email already registered' });
       }
 
       // Hash password and create user
       const hashedPassword = await hashPassword(password);
-      const user = UserModel.create(email, hashedPassword, firstName, lastName, company);
+      const user = await UserModel.create(email, hashedPassword, firstName, lastName, company);
 
       // Generate token
       const token = generateToken(user.id);
@@ -50,7 +50,7 @@ export class AuthController {
       }
 
       // Find user
-      const user = UserModel.findByEmail(email);
+      const user = await UserModel.findByEmail(email);
       if (!user) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
@@ -76,7 +76,7 @@ export class AuthController {
 
   static async getProfile(req: AuthRequest, res: Response) {
     try {
-      const user = UserModel.findById(req.userId!);
+      const user = await UserModel.findById(req.userId!);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -92,7 +92,7 @@ export class AuthController {
     try {
       const { firstName, lastName, company } = req.body;
 
-      const user = UserModel.update(req.userId!, {
+      const user = await UserModel.update(req.userId!, {
         first_name: firstName,
         last_name: lastName,
         company,
