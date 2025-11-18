@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react'
-import { saveToStorage, loadFromStorage } from '../utils/storage'
-import { calculateProcessScore } from '../utils/calculations'
+import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
+import { workshopAPI } from '../api/workshops';
+import { calculateProcessScore } from '../utils/calculations';
 
-const WorkshopContext = createContext()
+const WorkshopContext = createContext();
 
 // Initial state
 const initialState = {
+  workshopId: null,
+  workshopTitle: '',
   currentStep: 1,
   customer: {
     name: '',
@@ -24,7 +26,7 @@ const initialState = {
   customPackages: null, // null means use default packages from constants.js
   history: [],
   historyIndex: 0
-}
+};
 
 // Action types
 const Actions = {
@@ -47,10 +49,11 @@ const Actions = {
   REMOVE_ACTION_ITEM: 'REMOVE_ACTION_ITEM',
   SET_CUSTOM_PACKAGES: 'SET_CUSTOM_PACKAGES',
   LOAD_DATA: 'LOAD_DATA',
+  LOAD_WORKSHOP: 'LOAD_WORKSHOP',
   RESET_DATA: 'RESET_DATA',
   UNDO: 'UNDO',
   REDO: 'REDO'
-}
+};
 
 // Reducer
 const workshopReducer = (state, action) => {
@@ -58,14 +61,14 @@ const workshopReducer = (state, action) => {
 
   switch (action.type) {
     case Actions.SET_STEP:
-      return { ...state, currentStep: action.payload }
+      return { ...state, currentStep: action.payload };
 
     case Actions.UPDATE_CUSTOMER:
-      return { ...state, customer: { ...state.customer, ...action.payload } }
+      return { ...state, customer: { ...state.customer, ...action.payload } };
 
     case Actions.ADD_TOOL:
-      newState = { ...state, tools: [...state.tools, { ...action.payload, id: Date.now().toString() }] }
-      return addToHistory(state, newState)
+      newState = { ...state, tools: [...state.tools, { ...action.payload, id: Date.now().toString() }] };
+      return addToHistory(state, newState);
 
     case Actions.UPDATE_TOOL:
       newState = {
@@ -73,21 +76,21 @@ const workshopReducer = (state, action) => {
         tools: state.tools.map(tool =>
           tool.id === action.payload.id ? { ...tool, ...action.payload.updates } : tool
         )
-      }
-      return addToHistory(state, newState)
+      };
+      return addToHistory(state, newState);
 
     case Actions.REMOVE_TOOL:
-      newState = { ...state, tools: state.tools.filter(tool => tool.id !== action.payload) }
-      return addToHistory(state, newState)
+      newState = { ...state, tools: state.tools.filter(tool => tool.id !== action.payload) };
+      return addToHistory(state, newState);
 
     case Actions.ADD_PROCESS:
       const newProcess = {
         ...action.payload,
         id: Date.now().toString(),
         score: calculateProcessScore(action.payload)
-      }
-      newState = { ...state, processes: [...state.processes, newProcess] }
-      return addToHistory(state, newState)
+      };
+      newState = { ...state, processes: [...state.processes, newProcess] };
+      return addToHistory(state, newState);
 
     case Actions.UPDATE_PROCESS:
       newState = {
@@ -97,19 +100,19 @@ const workshopReducer = (state, action) => {
             ? { ...process, ...action.payload.updates, score: calculateProcessScore({ ...process, ...action.payload.updates }) }
             : process
         )
-      }
-      return addToHistory(state, newState)
+      };
+      return addToHistory(state, newState);
 
     case Actions.REMOVE_PROCESS:
-      newState = { ...state, processes: state.processes.filter(process => process.id !== action.payload) }
-      return addToHistory(state, newState)
+      newState = { ...state, processes: state.processes.filter(process => process.id !== action.payload) };
+      return addToHistory(state, newState);
 
     case Actions.ADD_AUTOMATION_SCENARIO:
       newState = {
         ...state,
         automationScenarios: [...state.automationScenarios, { ...action.payload, id: Date.now().toString() }]
-      }
-      return addToHistory(state, newState)
+      };
+      return addToHistory(state, newState);
 
     case Actions.UPDATE_AUTOMATION_SCENARIO:
       newState = {
@@ -119,30 +122,30 @@ const workshopReducer = (state, action) => {
             ? { ...scenario, ...action.payload.updates }
             : scenario
         )
-      }
-      return addToHistory(state, newState)
+      };
+      return addToHistory(state, newState);
 
     case Actions.REMOVE_AUTOMATION_SCENARIO:
       newState = {
         ...state,
         automationScenarios: state.automationScenarios.filter(scenario => scenario.id !== action.payload)
-      }
-      return addToHistory(state, newState)
+      };
+      return addToHistory(state, newState);
 
     case Actions.SET_SELECTED_PACKAGE:
-      return { ...state, selectedPackage: action.payload }
+      return { ...state, selectedPackage: action.payload };
 
     case Actions.SET_HOURLY_RATE:
-      return { ...state, hourlyRate: action.payload }
+      return { ...state, hourlyRate: action.payload };
 
     case Actions.SET_NOTES:
-      return { ...state, notes: action.payload }
+      return { ...state, notes: action.payload };
 
     case Actions.ADD_ACTION_ITEM:
       return {
         ...state,
         actionItems: [...state.actionItems, { ...action.payload, id: Date.now().toString() }]
-      }
+      };
 
     case Actions.UPDATE_ACTION_ITEM:
       return {
@@ -150,87 +153,119 @@ const workshopReducer = (state, action) => {
         actionItems: state.actionItems.map(item =>
           item.id === action.payload.id ? { ...item, ...action.payload.updates } : item
         )
-      }
+      };
 
     case Actions.REMOVE_ACTION_ITEM:
       return {
         ...state,
         actionItems: state.actionItems.filter(item => item.id !== action.payload)
-      }
+      };
 
     case Actions.SET_CUSTOM_PACKAGES:
-      return { ...state, customPackages: action.payload }
+      return { ...state, customPackages: action.payload };
 
     case Actions.LOAD_DATA:
-      return { ...action.payload, history: [action.payload], historyIndex: 0 }
+      return { ...action.payload, history: [action.payload], historyIndex: 0 };
+
+    case Actions.LOAD_WORKSHOP:
+      const workshopData = action.payload.data?.data || initialState;
+      return {
+        ...workshopData,
+        workshopId: action.payload.id,
+        workshopTitle: action.payload.title,
+        history: [workshopData],
+        historyIndex: 0
+      };
 
     case Actions.RESET_DATA:
-      return { ...initialState, history: [initialState], historyIndex: 0 }
+      return { ...initialState, history: [initialState], historyIndex: 0 };
 
     case Actions.UNDO:
       if (state.historyIndex > 0) {
-        const newIndex = state.historyIndex - 1
-        return { ...state.history[newIndex], historyIndex: newIndex }
+        const newIndex = state.historyIndex - 1;
+        return { ...state.history[newIndex], historyIndex: newIndex, workshopId: state.workshopId, workshopTitle: state.workshopTitle };
       }
-      return state
+      return state;
 
     case Actions.REDO:
       if (state.historyIndex < state.history.length - 1) {
-        const newIndex = state.historyIndex + 1
-        return { ...state.history[newIndex], historyIndex: newIndex }
+        const newIndex = state.historyIndex + 1;
+        return { ...state.history[newIndex], historyIndex: newIndex, workshopId: state.workshopId, workshopTitle: state.workshopTitle };
       }
-      return state
+      return state;
 
     default:
-      return state
+      return state;
   }
-}
+};
 
 // Helper to add state to history (max 50 entries)
 const addToHistory = (state, newState) => {
-  const history = [...state.history.slice(0, state.historyIndex + 1), newState]
-  const trimmedHistory = history.slice(-50) // Keep last 50 entries
+  const history = [...state.history.slice(0, state.historyIndex + 1), newState];
+  const trimmedHistory = history.slice(-50); // Keep last 50 entries
   return {
     ...newState,
     history: trimmedHistory,
     historyIndex: trimmedHistory.length - 1
-  }
-}
+  };
+};
 
 // Context Provider
-export const WorkshopProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(workshopReducer, initialState)
+export const WorkshopProvider = ({ children, workshop }) => {
+  const [state, dispatch] = useReducer(workshopReducer, initialState);
+  const saveTimeoutRef = useRef(null);
 
-  // Load data from localStorage on mount
+  // Load workshop data when workshop prop changes
   useEffect(() => {
-    const savedData = loadFromStorage()
-    if (savedData) {
-      dispatch({ type: Actions.LOAD_DATA, payload: savedData })
+    if (workshop) {
+      dispatch({ type: Actions.LOAD_WORKSHOP, payload: workshop });
     }
-  }, [])
+  }, [workshop?.id]);
 
-  // Auto-save to localStorage (debounced)
+  // Auto-save to backend (debounced)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const { history, historyIndex, ...dataToSave } = state
-      saveToStorage(dataToSave)
-    }, 1000)
+    if (!state.workshopId) return; // Don't save if no workshop is loaded
 
-    return () => clearTimeout(timer)
-  }, [state])
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const { history, historyIndex, workshopId, workshopTitle, ...dataToSave } = state;
+
+        await workshopAPI.update(workshopId, {
+          data: {
+            version: '2.0.0',
+            timestamp: new Date().toISOString(),
+            data: dataToSave
+          },
+          currentStep: state.currentStep
+        });
+      } catch (error) {
+        console.error('Error saving workshop:', error);
+      }
+    }, 2000); // Save after 2 seconds of inactivity
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [state]);
 
   return (
     <WorkshopContext.Provider value={{ state, dispatch, Actions }}>
       {children}
     </WorkshopContext.Provider>
-  )
-}
+  );
+};
 
 // Custom hook to use workshop context
 export const useWorkshop = () => {
-  const context = useContext(WorkshopContext)
+  const context = useContext(WorkshopContext);
   if (!context) {
-    throw new Error('useWorkshop must be used within WorkshopProvider')
+    throw new Error('useWorkshop must be used within WorkshopProvider');
   }
-  return context
-}
+  return context;
+};

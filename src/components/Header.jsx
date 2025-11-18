@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Save, Download, Upload, Trash2, HelpCircle, Settings, Menu, X } from 'lucide-react'
+import { Save, Download, Upload, Trash2, HelpCircle, Settings, Menu, X, ArrowLeft } from 'lucide-react'
 import Button from './ui/Button'
 import SettingsModal from './ui/SettingsModal'
 import { useWorkshop } from '../context/WorkshopContext'
@@ -7,7 +7,7 @@ import { exportAsJSON, importFromJSON, clearStorage } from '../utils/storage'
 import { useToast } from './ui/Toast'
 import { loadDemoData } from '../utils/templates'
 
-const Header = () => {
+const Header = ({ onBackToList }) => {
   const { state, dispatch, Actions } = useWorkshop()
   const { showToast } = useToast()
   const [saveStatus, setSaveStatus] = useState('saved') // 'saving', 'saved', 'unsaved', 'error'
@@ -114,6 +114,19 @@ const Header = () => {
             {/* Save Status */}
             <div className="hidden xl:block">{saveStatusIcons[saveStatus]}</div>
 
+            {/* Back to Workshops Button */}
+            {onBackToList && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onBackToList}
+                icon={ArrowLeft}
+                ariaLabel="Zurück zur Workshop-Liste"
+              >
+                <span className="hidden xl:inline">Workshops</span>
+              </Button>
+            )}
+
             {/* Demo Data Button */}
             <Button
               variant="ghost"
@@ -198,6 +211,20 @@ const Header = () => {
             <nav className="space-y-2" role="navigation" aria-label="Mobile Menü">
               {/* Save Status */}
               <div className="px-3 py-2">{saveStatusIcons[saveStatus]}</div>
+
+              {/* Back to Workshops Button (Mobile) */}
+              {onBackToList && (
+                <button
+                  onClick={() => {
+                    onBackToList()
+                    setIsMobileMenuOpen(false)
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-neutral-100 transition-colors text-left min-h-[44px]"
+                >
+                  <ArrowLeft className="w-5 h-5 text-neutral-600" />
+                  <span className="font-medium text-neutral-900">Zurück zu Workshops</span>
+                </button>
+              )}
 
               <button
                 onClick={() => {

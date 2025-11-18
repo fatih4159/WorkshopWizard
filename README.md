@@ -1,75 +1,298 @@
-# Workshop Wizard - Workflow-Automatisierung Tool
+# Workshop Wizard - Full Stack Edition
 
-Ein professionelles, interaktives Workshop-Tool für Workflow-Automatisierungs-Beratung bei deutschen KMU.
+Eine vollständige Workshop-Management-Anwendung mit separatem Backend und Frontend, inkl. User Management und Workshop-Persistierung.
 
-## Features
+## 🎯 Features
 
-### 8-Schritte Workshop-Flow
+### Backend
+- 🔐 **JWT-basierte Authentifizierung** - Sichere User-Sessions
+- 👥 **User Management** - Registrierung, Login, Profilverwaltung
+- 📝 **Workshop Management** - CRUD-Operationen für Workshops
+- 💾 **SQLite Datenbank** - Einfache, dateibasierte Persistierung
+- 🔒 **Sicheres Password Hashing** - bcrypt mit 10 Runden
+- 🌐 **CORS-Support** - Konfigurierbar für verschiedene Umgebungen
 
-1. **Kundeninfo** - Erfassung von Firmendaten und Teilnehmern
-2. **Tool-Landscape** - Dokumentation aller genutzten Software-Tools
-3. **Prozess-Erfassung** - Detaillierte Erfassung manueller Geschäftsprozesse
-4. **Automatisierungsszenarien** - Definition von SOLL-Zuständen und Einsparpotenzial
-5. **Priorisierung** - Automatische Bewertungsmatrix nach Automatisierungspotenzial
-6. **ROI-Berechnung** - Best/Average/Worst Case ROI-Kalkulation
-7. **Paket-Empfehlung** - Automatische Empfehlung des passenden Cynefa-Pakets
-8. **Zusammenfassung** - Vollständiger Workshop-Report mit Export-Funktionen
+### Frontend
+- ⚛️ **React 18** - Moderne UI mit Hooks
+- 🎨 **Tailwind CSS** - Responsive Design
+- 🔄 **Auto-Save** - Automatisches Speichern zum Backend
+- 📊 **ROI-Kalkulation** - Detaillierte Wirtschaftlichkeitsrechnung
+- 📄 **PDF Export** - Professionelle Workshop-Berichte
+- 🔍 **Workshop-Suche** - Einfaches Finden von Workshops
+- 💾 **Multi-Workshop-Support** - Mehrere Workshops parallel verwalten
 
-### Kernfunktionalitäten
+## 🚀 Quick Start
 
-- ✅ **Auto-Save** - Automatisches Speichern in LocalStorage
-- ✅ **PDF-Export** - Professioneller mehrseitiger Report
-- ✅ **JSON/CSV-Export** - Datenexport für Nachbearbeitung
-- ✅ **Demo-Daten** - Schnelleinstieg mit vorkonfigurierten Beispieldaten
-- ✅ **Templates** - Branchen-spezifische Vorlagen (E-Commerce, Dienstleistung, B2B)
-- ✅ **ROI-Dashboard** - Interaktive Sensitivitätsanalyse
-- ✅ **Responsive Design** - Optimiert für Desktop, Tablet und Mobile
+### Voraussetzungen
+- Node.js 18+ und npm
+- Git
 
-## Technologie-Stack
+### Installation & Start
 
-- **Framework:** React 18 mit Hooks
-- **Styling:** Tailwind CSS
-- **Icons:** Lucide React
-- **PDF:** jsPDF + html2canvas
-- **Charts:** Recharts
-- **Validation:** Zod
-- **State:** Context API + useReducer
-- **Build:** Vite
-
-## Installation
-
+1. **Repository klonen**
 ```bash
-# Dependencies installieren
-npm install
-
-# Development Server starten
-npm run dev
-
-# Production Build erstellen
-npm run build
+git clone <repository-url>
+cd WorkshopWizard
 ```
 
-## Verwendung
+2. **Backend starten**
+```bash
+cd backend
+npm install
+npm run dev
+```
+Das Backend läuft nun auf `http://localhost:3001`
 
-1. **Starten Sie die Anwendung**
-   ```bash
-   npm run dev
-   ```
-   Die App läuft auf [http://localhost:3000](http://localhost:3000)
+3. **Frontend starten** (in einem neuen Terminal)
+```bash
+# Im Hauptverzeichnis
+npm install
+npm run dev
+```
+Das Frontend läuft nun auf `http://localhost:3000`
 
-2. **Demo-Daten laden** (optional)
-   - Klicken Sie auf "Demo laden" im Header
-   - Vorkonfigurierte E-Commerce-Beispieldaten werden geladen
+4. **Öffne die Anwendung**
+```
+http://localhost:3000
+```
 
-3. **Workshop durchführen**
-   - Arbeiten Sie sich durch die 8 Schritte
-   - Alle Daten werden automatisch gespeichert
+## 📁 Projekt-Struktur
 
-4. **Export**
-   - **PDF**: Vollständiger Workshop-Report
-   - **JSON**: Alle Daten für Backup/Import
-   - **CSV**: Prozess-Tabelle für Excel
+```
+WorkshopWizard/
+├── backend/                    # Express Backend
+│   ├── src/
+│   │   ├── config/            # Datenbank-Konfiguration
+│   │   ├── controllers/       # Request Handler
+│   │   ├── middleware/        # Auth & Validation
+│   │   ├── models/           # Datenbank Models
+│   │   ├── routes/           # API Routes
+│   │   ├── types/            # TypeScript Typen
+│   │   ├── utils/            # Hilfsfunktionen
+│   │   └── server.ts         # Server Entry Point
+│   ├── data/                  # SQLite Datenbank
+│   └── package.json
+│
+├── src/                       # React Frontend
+│   ├── api/                  # API Client Layer
+│   │   ├── client.js         # Axios Instance
+│   │   ├── auth.js          # Auth API
+│   │   └── workshops.js     # Workshop API
+│   ├── components/
+│   │   ├── auth/            # Login/Register
+│   │   ├── steps/           # 8 Workshop Steps
+│   │   ├── ui/              # Reusable UI Components
+│   │   ├── Header.jsx
+│   │   ├── Navigation.jsx
+│   │   ├── ProgressBar.jsx
+│   │   └── WorkshopList.jsx
+│   ├── context/
+│   │   ├── AuthContext.jsx   # User Authentication State
+│   │   └── WorkshopContext.jsx  # Workshop State Management
+│   ├── utils/               # Helper Functions
+│   ├── App.jsx              # Main App Router
+│   └── main.jsx             # Entry Point
+│
+└── README.md
+```
 
-## Version
+## 🔧 Konfiguration
 
-**Version:** 2.0.0
+### Backend (.env)
+```env
+PORT=3001
+NODE_ENV=development
+JWT_SECRET=your-super-secret-key
+JWT_EXPIRES_IN=7d
+DATABASE_PATH=./data/workshop.db
+CORS_ORIGIN=http://localhost:3000
+```
+
+### Frontend (.env)
+```env
+VITE_API_URL=http://localhost:3001/api
+```
+
+## 📚 API Dokumentation
+
+### Authentication Endpoints
+
+#### Registrierung
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "firstName": "Max",
+  "lastName": "Mustermann",
+  "company": "Beispiel GmbH"
+}
+```
+
+#### Login
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+**Response:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "first_name": "Max",
+    "last_name": "Mustermann",
+    "company": "Beispiel GmbH"
+  }
+}
+```
+
+#### Profil abrufen
+```http
+GET /api/auth/profile
+Authorization: Bearer <token>
+```
+
+#### Profil aktualisieren
+```http
+PUT /api/auth/profile
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "firstName": "Max",
+  "lastName": "Mustermann",
+  "company": "Neue Firma GmbH"
+}
+```
+
+### Workshop Endpoints
+
+#### Workshop erstellen
+```http
+POST /api/workshops
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "title": "Mein Workshop",
+  "data": { ... }  // Optional
+}
+```
+
+#### Alle Workshops abrufen
+```http
+GET /api/workshops
+Authorization: Bearer <token>
+```
+
+#### Workshop nach ID abrufen
+```http
+GET /api/workshops/:id
+Authorization: Bearer <token>
+```
+
+#### Workshop aktualisieren
+```http
+PUT /api/workshops/:id
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "title": "Aktualisierter Titel",
+  "data": { ... },
+  "currentStep": 3,
+  "isCompleted": false
+}
+```
+
+#### Workshop löschen
+```http
+DELETE /api/workshops/:id
+Authorization: Bearer <token>
+```
+
+## 🎨 Workflow
+
+1. **Registrierung/Login** - Benutzer erstellt Account oder meldet sich an
+2. **Workshop-Liste** - Übersicht aller Workshops des Benutzers
+3. **Workshop erstellen/auswählen** - Neuen Workshop starten oder bestehenden fortsetzen
+4. **Workshop durchführen** - 8 Schritte zur Automatisierungs-Analyse
+5. **Auto-Save** - Änderungen werden automatisch im Backend gespeichert
+6. **Export** - PDF/JSON/CSV Export für Dokumentation
+
+## 🔒 Sicherheit
+
+- Passwörter werden mit bcrypt (10 Runden) gehasht
+- JWT-Tokens für stateless Authentication
+- CORS-Schutz konfiguriert
+- SQL Injection Schutz durch Prepared Statements
+- Foreign Key Constraints in der Datenbank
+- Input Validation auf Server-Seite
+
+## 🛠️ Entwicklung
+
+### Backend Development
+```bash
+cd backend
+npm run dev          # Start mit tsx watch (Hot Reload)
+npm run build        # TypeScript kompilieren
+npm start            # Production Start
+```
+
+### Frontend Development
+```bash
+npm run dev          # Vite Dev Server mit HMR
+npm run build        # Production Build
+npm run preview      # Preview Production Build
+npm run lint         # ESLint Check
+```
+
+## 📦 Deployment
+
+### Backend
+1. `.env` Datei mit Production-Werten erstellen
+2. `npm run build` ausführen
+3. `node dist/server.js` oder Process Manager (PM2) nutzen
+
+### Frontend
+1. `.env` mit Production API URL erstellen
+2. `npm run build` ausführen
+3. `dist/` Ordner auf Webserver deployen (Nginx, Apache, Vercel, etc.)
+
+## 🐛 Troubleshooting
+
+### Backend startet nicht
+- Prüfen ob Port 3001 frei ist: `lsof -i :3001`
+- `.env` Datei existiert und korrekt konfiguriert ist
+- Dependencies installiert: `npm install`
+
+### Frontend kann nicht mit Backend kommunizieren
+- Backend läuft: `curl http://localhost:3001/api/health`
+- CORS konfiguration in Backend prüfen
+- `VITE_API_URL` in Frontend `.env` korrekt
+
+### Datenbank-Fehler
+- `backend/data/` Ordner existiert und hat Schreibrechte
+- Datenbank löschen und neu erstellen: `rm backend/data/workshop.db` und neu starten
+
+## 📝 Lizenz
+
+MIT
+
+## 👥 Support
+
+Bei Fragen oder Problemen, bitte ein Issue erstellen.
+
+---
+
+**Viel Erfolg mit Workshop Wizard! 🎉**

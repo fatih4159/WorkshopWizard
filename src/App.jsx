@@ -1,10 +1,14 @@
-import React from 'react'
-import { WorkshopProvider } from './context/WorkshopContext'
+import React, { useState } from 'react'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import { WorkshopProvider, useWorkshop } from './context/WorkshopContext'
 import { ToastProvider } from './components/ui/Toast'
 import Header from './components/Header'
 import ProgressBar from './components/ProgressBar'
 import Navigation from './components/Navigation'
 import ErrorBoundary from './components/ErrorBoundary'
+import Login from './components/auth/Login'
+import Register from './components/auth/Register'
+import WorkshopList from './components/WorkshopList'
 
 // Import Steps
 import Step1_CustomerInfo from './components/steps/Step1_CustomerInfo'
@@ -20,15 +24,63 @@ const App = () => {
   return (
     <ErrorBoundary>
       <ToastProvider>
-        <WorkshopProvider>
-          <AppContent />
-        </WorkshopProvider>
+        <AuthProvider>
+          <AppRouter />
+        </AuthProvider>
       </ToastProvider>
     </ErrorBoundary>
   )
 }
 
-const AppContent = () => {
+const AppRouter = () => {
+  const { isAuthenticated, loading } = useAuth()
+  const [showRegister, setShowRegister] = useState(false)
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-neutral-600">Laden...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return showRegister ? (
+      <Register onSwitchToLogin={() => setShowRegister(false)} />
+    ) : (
+      <Login onSwitchToRegister={() => setShowRegister(true)} />
+    )
+  }
+
+  return <WorkshopManager />
+}
+
+const WorkshopManager = () => {
+  const [selectedWorkshop, setSelectedWorkshop] = useState(null)
+
+  const handleSelectWorkshop = (workshop) => {
+    setSelectedWorkshop(workshop)
+  }
+
+  const handleBackToList = () => {
+    setSelectedWorkshop(null)
+  }
+
+  if (!selectedWorkshop) {
+    return <WorkshopList onSelectWorkshop={handleSelectWorkshop} />
+  }
+
+  return (
+    <WorkshopProvider workshop={selectedWorkshop}>
+      <WorkshopContent onBackToList={handleBackToList} />
+    </WorkshopProvider>
+  )
+}
+
+const WorkshopContent = ({ onBackToList }) => {
   const { state } = useWorkshop()
   const currentStep = state.currentStep
 
@@ -63,7 +115,7 @@ const AppContent = () => {
         Zum Hauptinhalt springen
       </a>
 
-      <Header />
+      <Header onBackToList={onBackToList} />
       <ProgressBar />
 
       <main
@@ -81,8 +133,5 @@ const AppContent = () => {
     </div>
   )
 }
-
-// Import useWorkshop hook
-import { useWorkshop } from './context/WorkshopContext'
 
 export default App
