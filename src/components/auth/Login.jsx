@@ -17,13 +17,27 @@ export default function Login({ onSwitchToRegister }) {
     setError('');
     setLoading(true);
 
-    const result = await login(email, password);
+    console.log('🔐 Login attempt:', { email });
 
-    if (!result.success) {
-      setError(result.error);
+    try {
+      const result = await login(email, password);
+
+      console.log('📩 Login result:', result);
+
+      if (!result.success) {
+        console.log('❌ Login failed:', result.error);
+        setError(result.error);
+        setLoading(false);
+      } else {
+        console.log('✅ Login successful!');
+        // If successful, AuthContext will handle the redirect
+        // Don't set loading to false - component will unmount
+      }
+    } catch (err) {
+      console.error('❌ Unexpected error:', err);
+      setError('Ein unerwarteter Fehler ist aufgetreten');
       setLoading(false);
     }
-    // If successful, AuthContext will handle the redirect
   };
 
   return (

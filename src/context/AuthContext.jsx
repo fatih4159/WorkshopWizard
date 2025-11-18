@@ -13,23 +13,32 @@ export function AuthProvider({ children }) {
     const storedToken = localStorage.getItem('authToken');
     const storedUser = localStorage.getItem('user');
 
+    console.log('🔍 Checking stored auth:', { hasToken: !!storedToken, hasUser: !!storedUser });
+
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
+      console.log('✅ Restored auth from localStorage');
     }
     setLoading(false);
   }, []);
 
   const login = async (email, password) => {
     try {
+      console.log('📡 Sending login request to API...');
       const response = await authAPI.login(email, password);
+      console.log('📦 API response:', response);
+
       setToken(response.token);
       setUser(response.user);
       localStorage.setItem('authToken', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
+
+      console.log('✅ Login successful, auth state updated');
       return { success: true };
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
+      console.error('Error details:', error.response?.data);
       return {
         success: false,
         error: error.response?.data?.error || 'Login fehlgeschlagen',
@@ -39,14 +48,20 @@ export function AuthProvider({ children }) {
 
   const register = async (email, password, firstName, lastName, company) => {
     try {
+      console.log('📡 Sending registration request to API...');
       const response = await authAPI.register(email, password, firstName, lastName, company);
+      console.log('📦 API response:', response);
+
       setToken(response.token);
       setUser(response.user);
       localStorage.setItem('authToken', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
+
+      console.log('✅ Registration successful, auth state updated');
       return { success: true };
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('❌ Registration error:', error);
+      console.error('Error details:', error.response?.data);
       return {
         success: false,
         error: error.response?.data?.error || 'Registrierung fehlgeschlagen',
@@ -55,6 +70,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    console.log('👋 Logging out...');
     setToken(null);
     setUser(null);
     localStorage.removeItem('authToken');
@@ -87,6 +103,8 @@ export function AuthProvider({ children }) {
     logout,
     updateProfile,
   };
+
+  console.log('🔐 Auth state:', { isAuthenticated: !!token, hasUser: !!user, loading });
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
