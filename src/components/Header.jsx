@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Save, Download, Upload, Trash2, HelpCircle, Settings, Menu, X, ArrowLeft } from 'lucide-react'
 import Button from './ui/Button'
+import Tooltip from './ui/Tooltip'
 import SettingsModal from './ui/SettingsModal'
 import { useWorkshop } from '../context/WorkshopContext'
 import { exportAsJSON, importFromJSON, clearStorage } from '../utils/storage'
@@ -116,82 +117,82 @@ const Header = ({ onBackToList }) => {
 
             {/* Back to Workshops Button */}
             {onBackToList && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onBackToList}
-                icon={ArrowLeft}
-                ariaLabel="Zurück zur Workshop-Liste"
-              >
-                <span className="hidden xl:inline">Workshops</span>
-              </Button>
+              <Tooltip content="Zurück zur Workshop-Liste" position="bottom">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onBackToList}
+                  icon={ArrowLeft}
+                  ariaLabel="Zurück zur Workshop-Liste"
+                />
+              </Tooltip>
             )}
 
             {/* Demo Data Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLoadDemo}
-              icon={Download}
-              ariaLabel="Demo-Daten laden"
-            >
-              <span className="hidden xl:inline">Demo laden</span>
-            </Button>
+            <Tooltip content="Demo-Daten laden" position="bottom">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLoadDemo}
+                icon={Download}
+                ariaLabel="Demo-Daten laden"
+              />
+            </Tooltip>
 
             {/* Export */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleExportJSON}
-              icon={Download}
-              ariaLabel="Daten exportieren"
-            >
-              <span className="hidden xl:inline">Export</span>
-            </Button>
+            <Tooltip content="Daten exportieren" position="bottom">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleExportJSON}
+                icon={Download}
+                ariaLabel="Daten exportieren"
+              />
+            </Tooltip>
 
             {/* Import */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleImportJSON}
-              icon={Upload}
-              ariaLabel="Daten importieren"
-            >
-              <span className="hidden xl:inline">Import</span>
-            </Button>
+            <Tooltip content="Daten importieren" position="bottom">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleImportJSON}
+                icon={Upload}
+                ariaLabel="Daten importieren"
+              />
+            </Tooltip>
 
             {/* Reset */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReset}
-              icon={Trash2}
-              ariaLabel="Alle Daten zurücksetzen"
-            >
-              <span className="hidden xl:inline">Zurücksetzen</span>
-            </Button>
+            <Tooltip content="Alle Daten zurücksetzen" position="bottom">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleReset}
+                icon={Trash2}
+                ariaLabel="Alle Daten zurücksetzen"
+              />
+            </Tooltip>
 
             {/* Settings */}
-            <Button
-              variant="ghost"
-              size="sm"
-              icon={Settings}
-              ariaLabel="Einstellungen"
-              onClick={() => setShowSettingsModal(true)}
-            >
-              <span className="hidden xl:inline">Einstellungen</span>
-            </Button>
+            <Tooltip content="Einstellungen" position="bottom">
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={Settings}
+                ariaLabel="Einstellungen"
+                onClick={() => setShowSettingsModal(true)}
+              />
+            </Tooltip>
 
             {/* Help */}
-            <Button
-              variant="ghost"
-              size="sm"
-              icon={HelpCircle}
-              ariaLabel="Hilfe anzeigen"
-              onClick={() => showToast('Hilfe-Funktion wird noch implementiert', 'info')}
-            >
-              <span className="hidden xl:inline">Hilfe</span>
-            </Button>
+            <Tooltip content="Hilfe" position="bottom">
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={HelpCircle}
+                ariaLabel="Hilfe anzeigen"
+                onClick={() => showToast('Hilfe-Funktion wird noch implementiert', 'info')}
+              />
+            </Tooltip>
           </div>
 
           {/* Mobile Menu Button */}
