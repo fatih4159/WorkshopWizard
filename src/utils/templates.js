@@ -265,6 +265,9 @@ export const B2B_TEMPLATE = {
 }
 
 export const DEMO_DATA = {
+  workshopId: null,
+  workshopTitle: '',
+  currentStep: 1,
   customer: {
     name: 'Mustermann E-Commerce GmbH',
     industry: 'E-Commerce',
@@ -276,7 +279,16 @@ export const DEMO_DATA = {
     ],
     date: new Date().toISOString().split('T')[0]
   },
-  ...ECOMMERCE_TEMPLATE
+  tools: ECOMMERCE_TEMPLATE.tools,
+  processes: ECOMMERCE_TEMPLATE.processes,
+  automationScenarios: [],
+  selectedPackage: null,
+  hourlyRate: 45,
+  notes: '',
+  actionItems: [],
+  customPackages: null,
+  history: [],
+  historyIndex: 0
 }
 
 /**
