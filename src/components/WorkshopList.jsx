@@ -134,7 +134,10 @@ export default function WorkshopList({ onSelectWorkshop }) {
               />
             </div>
           </div>
-          <Button variant="primary" onClick={() => setShowCreateModal(true)}>
+          <Button variant="primary" onClick={() => {
+            console.log('➕ Opening create modal');
+            setShowCreateModal(true);
+          }}>
             <Plus className="w-5 h-5 mr-2" />
             Neuer Workshop
           </Button>
@@ -216,6 +219,7 @@ export default function WorkshopList({ onSelectWorkshop }) {
         <Modal
           title="Neuer Workshop"
           onClose={() => {
+            console.log('❌ Modal closing');
             setShowCreateModal(false);
             setNewWorkshopTitle('');
           }}
@@ -228,11 +232,15 @@ export default function WorkshopList({ onSelectWorkshop }) {
               <Input
                 type="text"
                 value={newWorkshopTitle}
-                onChange={(e) => setNewWorkshopTitle(e.target.value)}
+                onChange={(e) => {
+                  console.log('✏️ Title changed:', e.target.value);
+                  setNewWorkshopTitle(e.target.value);
+                }}
                 placeholder="z.B. Kundenname - Workshop 2024"
                 autoFocus
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
+                    console.log('⏎ Enter pressed');
                     handleCreateWorkshop();
                   }
                 }}
@@ -243,6 +251,7 @@ export default function WorkshopList({ onSelectWorkshop }) {
               <Button
                 variant="outline"
                 onClick={() => {
+                  console.log('🚫 Abbrechen clicked');
                   setShowCreateModal(false);
                   setNewWorkshopTitle('');
                 }}
@@ -251,7 +260,12 @@ export default function WorkshopList({ onSelectWorkshop }) {
               </Button>
               <Button
                 variant="primary"
-                onClick={handleCreateWorkshop}
+                onClick={() => {
+                  console.log('🖱️ Erstellen button clicked');
+                  console.log('Title:', newWorkshopTitle);
+                  console.log('Disabled?', !newWorkshopTitle.trim() || creating);
+                  handleCreateWorkshop();
+                }}
                 disabled={!newWorkshopTitle.trim() || creating}
               >
                 {creating ? 'Erstellen...' : 'Erstellen'}
