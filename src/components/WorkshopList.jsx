@@ -215,15 +215,15 @@ export default function WorkshopList({ onSelectWorkshop }) {
       </div>
 
       {/* Create Workshop Modal */}
-      {showCreateModal && (
-        <Modal
-          title="Neuer Workshop"
-          onClose={() => {
-            console.log('❌ Modal closing');
-            setShowCreateModal(false);
-            setNewWorkshopTitle('');
-          }}
-        >
+      <Modal
+        isOpen={showCreateModal}
+        title="Neuer Workshop"
+        onClose={() => {
+          console.log('❌ Modal closing');
+          setShowCreateModal(false);
+          setNewWorkshopTitle('');
+        }}
+      >
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-2">
@@ -273,7 +273,6 @@ export default function WorkshopList({ onSelectWorkshop }) {
             </div>
           </div>
         </Modal>
-      )}
     </div>
   );
 }
