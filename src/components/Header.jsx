@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Save, Download, Upload, Trash2, HelpCircle, Settings } from 'lucide-react'
+import { Save, Download, Upload, Trash2, HelpCircle, Settings, Menu, X } from 'lucide-react'
 import Button from './ui/Button'
 import SettingsModal from './ui/SettingsModal'
 import { useWorkshop } from '../context/WorkshopContext'
@@ -12,6 +12,7 @@ const Header = () => {
   const { showToast } = useToast()
   const [saveStatus, setSaveStatus] = useState('saved') // 'saving', 'saved', 'unsaved', 'error'
   const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   // Auto-save indicator
   useEffect(() => {
@@ -94,26 +95,24 @@ const Header = () => {
   }
 
   return (
-    <header className="bg-white border-b border-neutral-200 shadow-sm no-print">
+    <header className="bg-white border-b border-neutral-200 shadow-sm no-print sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo & Title */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                W
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-neutral-900">Workshop Wizard</h1>
-                <p className="text-xs text-neutral-500">Workflow-Automatisierung</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-md transform transition-transform hover:scale-105">
+              W
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold text-neutral-900">Workshop Wizard</h1>
+              <p className="text-xs text-neutral-500 hidden sm:block">Workflow-Automatisierung</p>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-3">
+          {/* Desktop Actions */}
+          <div className="hidden lg:flex items-center gap-2 xl:gap-3">
             {/* Save Status */}
-            {saveStatusIcons[saveStatus]}
+            <div className="hidden xl:block">{saveStatusIcons[saveStatus]}</div>
 
             {/* Demo Data Button */}
             <Button
@@ -123,7 +122,7 @@ const Header = () => {
               icon={Download}
               ariaLabel="Demo-Daten laden"
             >
-              Demo laden
+              <span className="hidden xl:inline">Demo laden</span>
             </Button>
 
             {/* Export */}
@@ -134,7 +133,7 @@ const Header = () => {
               icon={Download}
               ariaLabel="Daten exportieren"
             >
-              Export
+              <span className="hidden xl:inline">Export</span>
             </Button>
 
             {/* Import */}
@@ -145,7 +144,7 @@ const Header = () => {
               icon={Upload}
               ariaLabel="Daten importieren"
             >
-              Import
+              <span className="hidden xl:inline">Import</span>
             </Button>
 
             {/* Reset */}
@@ -156,7 +155,7 @@ const Header = () => {
               icon={Trash2}
               ariaLabel="Alle Daten zurücksetzen"
             >
-              Zurücksetzen
+              <span className="hidden xl:inline">Zurücksetzen</span>
             </Button>
 
             {/* Settings */}
@@ -167,7 +166,7 @@ const Header = () => {
               ariaLabel="Einstellungen"
               onClick={() => setShowSettingsModal(true)}
             >
-              Einstellungen
+              <span className="hidden xl:inline">Einstellungen</span>
             </Button>
 
             {/* Help */}
@@ -178,10 +177,96 @@ const Header = () => {
               ariaLabel="Hilfe anzeigen"
               onClick={() => showToast('Hilfe-Funktion wird noch implementiert', 'info')}
             >
-              Hilfe
+              <span className="hidden xl:inline">Hilfe</span>
             </Button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="lg:hidden p-2 rounded-lg hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? 'Menü schließen' : 'Menü öffnen'}
+            aria-expanded={isMobileMenuOpen}
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden py-4 border-t border-neutral-200 animate-slide-in">
+            <nav className="space-y-2" role="navigation" aria-label="Mobile Menü">
+              {/* Save Status */}
+              <div className="px-3 py-2">{saveStatusIcons[saveStatus]}</div>
+
+              <button
+                onClick={() => {
+                  handleLoadDemo()
+                  setIsMobileMenuOpen(false)
+                }}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-neutral-100 transition-colors text-left min-h-[44px]"
+              >
+                <Download className="w-5 h-5 text-neutral-600" />
+                <span className="font-medium text-neutral-900">Demo-Daten laden</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  handleExportJSON()
+                  setIsMobileMenuOpen(false)
+                }}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-neutral-100 transition-colors text-left min-h-[44px]"
+              >
+                <Download className="w-5 h-5 text-neutral-600" />
+                <span className="font-medium text-neutral-900">Daten exportieren</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  handleImportJSON()
+                  setIsMobileMenuOpen(false)
+                }}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-neutral-100 transition-colors text-left min-h-[44px]"
+              >
+                <Upload className="w-5 h-5 text-neutral-600" />
+                <span className="font-medium text-neutral-900">Daten importieren</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  handleReset()
+                  setIsMobileMenuOpen(false)
+                }}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-neutral-100 transition-colors text-left min-h-[44px]"
+              >
+                <Trash2 className="w-5 h-5 text-error" />
+                <span className="font-medium text-neutral-900">Alle Daten zurücksetzen</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowSettingsModal(true)
+                  setIsMobileMenuOpen(false)
+                }}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-neutral-100 transition-colors text-left min-h-[44px]"
+              >
+                <Settings className="w-5 h-5 text-neutral-600" />
+                <span className="font-medium text-neutral-900">Einstellungen</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  showToast('Hilfe-Funktion wird noch implementiert', 'info')
+                  setIsMobileMenuOpen(false)
+                }}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-neutral-100 transition-colors text-left min-h-[44px]"
+              >
+                <HelpCircle className="w-5 h-5 text-neutral-600" />
+                <span className="font-medium text-neutral-900">Hilfe</span>
+              </button>
+            </nav>
+          </div>
+        )}
       </div>
 
       {/* Settings Modal */}

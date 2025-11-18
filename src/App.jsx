@@ -58,11 +58,23 @@ const AppContent = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50">
+      {/* Skip to main content link for keyboard navigation */}
+      <a href="#main-content" className="skip-link">
+        Zum Hauptinhalt springen
+      </a>
+
       <Header />
       <ProgressBar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-20">
-        {renderStep()}
+      <main
+        id="main-content"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-20"
+        role="main"
+        aria-label="Hauptinhalt"
+      >
+        <div className="animate-fade-in">
+          {renderStep()}
+        </div>
       </main>
 
       <Navigation />
