@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { initializeDatabase } from './config/database';
-import authRoutes from './routes/authRoutes';
-import workshopRoutes from './routes/workshopRoutes';
+import { initializeDatabase } from './config/database.js';
+import authRoutes from './routes/authRoutes.js';
+import workshopRoutes from './routes/workshopRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -19,9 +19,6 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-
-// Initialize database
-initializeDatabase();
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -43,11 +40,17 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔒 CORS enabled for: ${CORS_ORIGIN}`);
-});
+// Initialize database and start server
+async function startServer() {
+  await initializeDatabase();
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🔒 CORS enabled for: ${CORS_ORIGIN}`);
+  });
+}
+
+startServer().catch(console.error);
 
 export default app;

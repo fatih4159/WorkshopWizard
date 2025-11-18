@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { UserModel } from '../models/User';
-import { hashPassword, comparePassword, generateToken } from '../utils/auth';
-import { AuthRequest } from '../middleware/auth';
+import { UserModel } from '../models/User.js';
+import { hashPassword, comparePassword, generateToken } from '../utils/auth.js';
+import { AuthRequest } from '../middleware/auth.js';
 
 export class AuthController {
   static async register(req: Request, res: Response) {

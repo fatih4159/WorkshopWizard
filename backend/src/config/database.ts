@@ -1,8 +1,10 @@
-import Database from 'better-sqlite3';
-import path from 'path';
+import { join, dirname } from 'path';
+import { Low } from 'lowdb';
+import { JSONFile } from 'lowdb/node';
 import fs from 'fs';
+import path from 'path';
 
-const dbPath = process.env.DATABASE_PATH || './data/workshop.db';
+const dbPath = process.env.DATABASE_PATH || './data/db.json';
 const dbDir = path.dirname(dbPath);
 
 // Ensure data directory exists
@@ -10,41 +12,60 @@ if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
-export const db = new Database(dbPath);
+// Database schema type
+export type User = {
+  id: number;
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  company?: string;
+  created_at: string;
+  updated_at: string;
+};
 
-// Enable foreign keys
-db.pragma('foreign_keys = ON');
+export type Workshop = {
+  id: number;
+  user_id: number;
+  title: string;
+  data: string;
+  current_step: number;
+  is_completed: boolean;
+  last_accessed: string;
+  created_at: string;
+  updated_at: string;
+};
 
-// Initialize database schema
-export function initializeDatabase() {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
-      first_name TEXT NOT NULL,
-      last_name TEXT NOT NULL,
-      company TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+type Data = {
+  users: User[];
+  workshops: Workshop[];
+  _meta: {
+    nextUserId: number;
+    nextWorkshopId: number;
+  };
+};
 
-    CREATE TABLE IF NOT EXISTS workshops (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      title TEXT NOT NULL,
-      data TEXT NOT NULL,
-      current_step INTEGER DEFAULT 1,
-      is_completed BOOLEAN DEFAULT 0,
-      last_accessed DATETIME DEFAULT CURRENT_TIMESTAMP,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    );
+// Initialize database
+const adapter = new JSONFile<Data>(dbPath);
+const defaultData: Data = {
+  users: [],
+  workshops: [],
+  _meta: {
+    nextUserId: 1,
+    nextWorkshopId: 1,
+  },
+};
 
-    CREATE INDEX IF NOT EXISTS idx_workshops_user_id ON workshops(user_id);
-    CREATE INDEX IF NOT EXISTS idx_workshops_last_accessed ON workshops(last_accessed DESC);
-  `);
+export const db = new Low(adapter, defaultData);
+
+export async function initializeDatabase() {
+  await db.read();
+
+  // Initialize with default data if empty
+  if (!db.data) {
+    db.data = defaultData;
+    await db.write();
+  }
 
   console.log('Database initialized successfully');
 }

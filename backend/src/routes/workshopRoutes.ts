@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { WorkshopController } from '../controllers/workshopController';
-import { authMiddleware } from '../middleware/auth';
+import { WorkshopController } from '../controllers/workshopController.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
 

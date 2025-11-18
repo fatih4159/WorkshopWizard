@@ -1,61 +1,64 @@
-import db from '../config/database';
-import { User, UserPublic } from '../types';
-import { hashPassword } from '../utils/auth';
+import db, { User as DBUser } from '../config/database.js';
+import { User, UserPublic } from '../types/index.js';
 
 export class UserModel {
-  static create(email: string, password: string, firstName: string, lastName: string, company?: string): User {
-    const stmt = db.prepare(`
-      INSERT INTO users (email, password, first_name, last_name, company)
-      VALUES (?, ?, ?, ?, ?)
-    `);
+  static async create(email: string, password: string, firstName: string, lastName: string, company?: string): Promise<User> {
+    await db.read();
 
-    const result = stmt.run(email, password, firstName, lastName, company || null);
+    const now = new Date().toISOString();
+    const id = db.data!._meta.nextUserId++;
 
-    return this.findById(result.lastInsertRowid as number)!;
+    const user: DBUser = {
+      id,
+      email,
+      password,
+      first_name: firstName,
+      last_name: lastName,
+      company,
+      created_at: now,
+      updated_at: now,
+    };
+
+    db.data!.users.push(user);
+    await db.write();
+
+    return user as User;
   }
 
-  static findById(id: number): User | undefined {
-    const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
-    return stmt.get(id) as User | undefined;
+  static async findById(id: number): Promise<User | undefined> {
+    await db.read();
+    return db.data!.users.find(u => u.id === id) as User | undefined;
   }
 
-  static findByEmail(email: string): User | undefined {
-    const stmt = db.prepare('SELECT * FROM users WHERE email = ?');
-    return stmt.get(email) as User | undefined;
+  static async findByEmail(email: string): Promise<User | undefined> {
+    await db.read();
+    return db.data!.users.find(u => u.email === email) as User | undefined;
   }
 
-  static update(id: number, data: Partial<Pick<User, 'first_name' | 'last_name' | 'company'>>): User | undefined {
-    const updates: string[] = [];
-    const values: any[] = [];
+  static async update(id: number, data: Partial<Pick<User, 'first_name' | 'last_name' | 'company'>>): Promise<User | undefined> {
+    await db.read();
+
+    const userIndex = db.data!.users.findIndex(u => u.id === id);
+    if (userIndex === -1) {
+      return undefined;
+    }
+
+    const user = db.data!.users[userIndex];
 
     if (data.first_name !== undefined) {
-      updates.push('first_name = ?');
-      values.push(data.first_name);
+      user.first_name = data.first_name;
     }
     if (data.last_name !== undefined) {
-      updates.push('last_name = ?');
-      values.push(data.last_name);
+      user.last_name = data.last_name;
     }
     if (data.company !== undefined) {
-      updates.push('company = ?');
-      values.push(data.company);
+      user.company = data.company;
     }
 
-    if (updates.length === 0) {
-      return this.findById(id);
-    }
+    user.updated_at = new Date().toISOString();
 
-    updates.push('updated_at = CURRENT_TIMESTAMP');
-    values.push(id);
-
-    const stmt = db.prepare(`
-      UPDATE users
-      SET ${updates.join(', ')}
-      WHERE id = ?
-    `);
-
-    stmt.run(...values);
-    return this.findById(id);
+    await db.write();
+    return user as User;
   }
 
   static toPublic(user: User): UserPublic {

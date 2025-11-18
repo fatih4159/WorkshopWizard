@@ -1,6 +1,6 @@
 import { Response } from 'express';
-import { WorkshopModel } from '../models/Workshop';
-import { AuthRequest } from '../middleware/auth';
+import { WorkshopModel } from '../models/Workshop.js';
+import { AuthRequest } from '../middleware/auth.js';
 
 export class WorkshopController {
   static async create(req: AuthRequest, res: Response) {

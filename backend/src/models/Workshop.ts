@@ -1,92 +1,104 @@
-import db from '../config/database';
-import { Workshop } from '../types';
+import db, { Workshop as DBWorkshop } from '../config/database.js';
+import { Workshop } from '../types/index.js';
 
 export class WorkshopModel {
-  static create(userId: number, title: string, data: string): Workshop {
-    const stmt = db.prepare(`
-      INSERT INTO workshops (user_id, title, data, current_step)
-      VALUES (?, ?, ?, 1)
-    `);
+  static async create(userId: number, title: string, data: string): Promise<Workshop> {
+    await db.read();
 
-    const result = stmt.run(userId, title, data);
-    return this.findById(result.lastInsertRowid as number)!;
+    const now = new Date().toISOString();
+    const id = db.data!._meta.nextWorkshopId++;
+
+    const workshop: DBWorkshop = {
+      id,
+      user_id: userId,
+      title,
+      data,
+      current_step: 1,
+      is_completed: false,
+      last_accessed: now,
+      created_at: now,
+      updated_at: now,
+    };
+
+    db.data!.workshops.push(workshop);
+    await db.write();
+
+    return workshop as Workshop;
   }
 
-  static findById(id: number): Workshop | undefined {
-    const stmt = db.prepare('SELECT * FROM workshops WHERE id = ?');
-    return stmt.get(id) as Workshop | undefined;
+  static async findById(id: number): Promise<Workshop | undefined> {
+    await db.read();
+    return db.data!.workshops.find(w => w.id === id) as Workshop | undefined;
   }
 
-  static findByUserId(userId: number): Workshop[] {
-    const stmt = db.prepare(`
-      SELECT * FROM workshops
-      WHERE user_id = ?
-      ORDER BY last_accessed DESC
-    `);
-    return stmt.all(userId) as Workshop[];
+  static async findByUserId(userId: number): Promise<Workshop[]> {
+    await db.read();
+    return db.data!.workshops
+      .filter(w => w.user_id === userId)
+      .sort((a, b) => new Date(b.last_accessed).getTime() - new Date(a.last_accessed).getTime()) as Workshop[];
   }
 
-  static findByUserAndId(userId: number, workshopId: number): Workshop | undefined {
-    const stmt = db.prepare('SELECT * FROM workshops WHERE id = ? AND user_id = ?');
-    return stmt.get(workshopId, userId) as Workshop | undefined;
+  static async findByUserAndId(userId: number, workshopId: number): Promise<Workshop | undefined> {
+    await db.read();
+    return db.data!.workshops.find(w => w.id === workshopId && w.user_id === userId) as Workshop | undefined;
   }
 
-  static update(id: number, userId: number, data: {
+  static async update(id: number, userId: number, data: {
     title?: string;
     data?: string;
     current_step?: number;
     is_completed?: boolean;
-  }): Workshop | undefined {
-    const updates: string[] = [];
-    const values: any[] = [];
+  }): Promise<Workshop | undefined> {
+    await db.read();
+
+    const workshopIndex = db.data!.workshops.findIndex(w => w.id === id && w.user_id === userId);
+    if (workshopIndex === -1) {
+      return undefined;
+    }
+
+    const workshop = db.data!.workshops[workshopIndex];
 
     if (data.title !== undefined) {
-      updates.push('title = ?');
-      values.push(data.title);
+      workshop.title = data.title;
     }
     if (data.data !== undefined) {
-      updates.push('data = ?');
-      values.push(data.data);
+      workshop.data = data.data;
     }
     if (data.current_step !== undefined) {
-      updates.push('current_step = ?');
-      values.push(data.current_step);
+      workshop.current_step = data.current_step;
     }
     if (data.is_completed !== undefined) {
-      updates.push('is_completed = ?');
-      values.push(data.is_completed ? 1 : 0);
+      workshop.is_completed = data.is_completed;
     }
 
-    if (updates.length === 0) {
-      return this.findById(id);
+    workshop.last_accessed = new Date().toISOString();
+    workshop.updated_at = new Date().toISOString();
+
+    await db.write();
+    return workshop as Workshop;
+  }
+
+  static async delete(id: number, userId: number): Promise<boolean> {
+    await db.read();
+
+    const initialLength = db.data!.workshops.length;
+    db.data!.workshops = db.data!.workshops.filter(w => !(w.id === id && w.user_id === userId));
+
+    if (db.data!.workshops.length < initialLength) {
+      await db.write();
+      return true;
     }
 
-    updates.push('last_accessed = CURRENT_TIMESTAMP');
-    updates.push('updated_at = CURRENT_TIMESTAMP');
-    values.push(id, userId);
-
-    const stmt = db.prepare(`
-      UPDATE workshops
-      SET ${updates.join(', ')}
-      WHERE id = ? AND user_id = ?
-    `);
-
-    stmt.run(...values);
-    return this.findById(id);
+    return false;
   }
 
-  static delete(id: number, userId: number): boolean {
-    const stmt = db.prepare('DELETE FROM workshops WHERE id = ? AND user_id = ?');
-    const result = stmt.run(id, userId);
-    return result.changes > 0;
-  }
+  static async updateLastAccessed(id: number, userId: number): Promise<void> {
+    await db.read();
 
-  static updateLastAccessed(id: number, userId: number): void {
-    const stmt = db.prepare(`
-      UPDATE workshops
-      SET last_accessed = CURRENT_TIMESTAMP
-      WHERE id = ? AND user_id = ?
-    `);
-    stmt.run(id, userId);
+    const workshop = db.data!.workshops.find(w => w.id === id && w.user_id === userId);
+    if (workshop) {
+      workshop.last_accessed = new Date().toISOString();
+      await db.write();
+    }
   }
 }
