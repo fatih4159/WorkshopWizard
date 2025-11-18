@@ -10,22 +10,27 @@ const ProgressBar = () => {
   const progress = (currentStep / WORKSHOP_STEPS.length) * 100
 
   return (
-    <div className="bg-white border-b border-neutral-200 no-print">
+    <nav
+      className="bg-white border-b border-neutral-200 no-print"
+      aria-label="Workshop Fortschritt"
+      role="navigation"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Progress Bar */}
-        <div className="mb-4">
+        <div className="mb-4" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin="0" aria-valuemax="100">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-neutral-700">
+            <span className="text-sm font-semibold text-neutral-700">
               Schritt {currentStep} von {WORKSHOP_STEPS.length}
             </span>
-            <span className="text-sm font-medium text-primary">
+            <span className="text-sm font-bold text-primary">
               {Math.round(progress)}%
             </span>
           </div>
-          <div className="w-full bg-neutral-200 rounded-full h-2">
+          <div className="w-full bg-neutral-200 rounded-full h-3 overflow-hidden shadow-inner">
             <div
-              className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
+              className="bg-gradient-to-r from-primary to-primary-600 h-3 rounded-full transition-all duration-500 ease-out shadow-sm"
               style={{ width: `${progress}%` }}
+              aria-hidden="true"
             />
           </div>
         </div>
@@ -42,27 +47,33 @@ const ProgressBar = () => {
               <div
                 key={step.id}
                 className={`
-                  flex flex-col items-center gap-1 p-2 rounded-lg transition-all duration-200
-                  ${isCurrent ? 'bg-primary-50 border-2 border-primary' : ''}
-                  ${isCompleted ? 'bg-green-50' : ''}
-                  ${isPending ? 'opacity-50' : ''}
+                  flex flex-col items-center gap-1.5 p-2 rounded-lg
+                  transition-all duration-200 ease-out
+                  ${isCurrent ? 'bg-primary-50 border-2 border-primary scale-105' : 'border-2 border-transparent'}
+                  ${isCompleted ? 'bg-success-50' : ''}
+                  ${isPending ? 'opacity-60' : ''}
                 `}
+                role="listitem"
+                aria-current={isCurrent ? 'step' : undefined}
+                aria-label={`${step.title} - ${isCompleted ? 'abgeschlossen' : isCurrent ? 'aktuell' : 'ausstehend'}`}
               >
                 <div
                   className={`
-                    flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm
-                    ${isCurrent ? 'bg-primary text-white' : ''}
+                    flex items-center justify-center w-10 h-10 rounded-full
+                    font-bold text-sm shadow-sm transition-all duration-200
+                    ${isCurrent ? 'bg-primary text-white ring-2 ring-primary ring-offset-2' : ''}
                     ${isCompleted ? 'bg-success text-white' : ''}
                     ${isPending ? 'bg-neutral-200 text-neutral-500' : ''}
                   `}
+                  aria-hidden="true"
                 >
-                  {isCompleted ? <Check className="w-4 h-4" /> : stepNumber}
+                  {isCompleted ? <Check className="w-5 h-5" /> : stepNumber}
                 </div>
                 <span
                   className={`
-                    text-xs text-center font-medium
-                    ${isCurrent ? 'text-primary' : ''}
-                    ${isCompleted ? 'text-success' : ''}
+                    text-xs text-center font-medium leading-tight
+                    ${isCurrent ? 'text-primary font-bold' : ''}
+                    ${isCompleted ? 'text-success font-semibold' : ''}
                     ${isPending ? 'text-neutral-500' : ''}
                   `}
                 >
@@ -73,7 +84,7 @@ const ProgressBar = () => {
           })}
         </div>
       </div>
-    </div>
+    </nav>
   )
 }
 
