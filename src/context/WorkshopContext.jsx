@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react'
-import { saveToStorage, loadFromStorage } from '../utils/storage'
+import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react'
+import { workshopAPI } from '../api/workshops'
 import { calculateProcessScore } from '../utils/calculations'
 
 const WorkshopContext = createContext()
 
 // Initial state
 const initialState = {
+  workshopId: null,
+  workshopTitle: '',
   currentStep: 1,
   customer: {
     name: '',
@@ -47,6 +49,7 @@ const Actions = {
   REMOVE_ACTION_ITEM: 'REMOVE_ACTION_ITEM',
   SET_CUSTOM_PACKAGES: 'SET_CUSTOM_PACKAGES',
   LOAD_DATA: 'LOAD_DATA',
+  LOAD_WORKSHOP: 'LOAD_WORKSHOP',
   RESET_DATA: 'RESET_DATA',
   UNDO: 'UNDO',
   REDO: 'REDO'
@@ -164,20 +167,30 @@ const workshopReducer = (state, action) => {
     case Actions.LOAD_DATA:
       return { ...action.payload, history: [action.payload], historyIndex: 0 }
 
+    case Actions.LOAD_WORKSHOP:
+      const workshopData = action.payload.data?.data || initialState;
+      return {
+        ...workshopData,
+        workshopId: action.payload.id,
+        workshopTitle: action.payload.title,
+        history: [workshopData],
+        historyIndex: 0
+      }
+
     case Actions.RESET_DATA:
       return { ...initialState, history: [initialState], historyIndex: 0 }
 
     case Actions.UNDO:
       if (state.historyIndex > 0) {
         const newIndex = state.historyIndex - 1
-        return { ...state.history[newIndex], historyIndex: newIndex }
+        return { ...state.history[newIndex], historyIndex: newIndex, workshopId: state.workshopId, workshopTitle: state.workshopTitle }
       }
       return state
 
     case Actions.REDO:
       if (state.historyIndex < state.history.length - 1) {
         const newIndex = state.historyIndex + 1
-        return { ...state.history[newIndex], historyIndex: newIndex }
+        return { ...state.history[newIndex], historyIndex: newIndex, workshopId: state.workshopId, workshopTitle: state.workshopTitle }
       }
       return state
 
@@ -198,25 +211,47 @@ const addToHistory = (state, newState) => {
 }
 
 // Context Provider
-export const WorkshopProvider = ({ children }) => {
+export const WorkshopProvider = ({ children, workshop }) {
   const [state, dispatch] = useReducer(workshopReducer, initialState)
+  const saveTimeoutRef = useRef(null)
 
-  // Load data from localStorage on mount
+  // Load workshop data when workshop prop changes
   useEffect(() => {
-    const savedData = loadFromStorage()
-    if (savedData) {
-      dispatch({ type: Actions.LOAD_DATA, payload: savedData })
+    if (workshop) {
+      dispatch({ type: Actions.LOAD_WORKSHOP, payload: workshop })
     }
-  }, [])
+  }, [workshop?.id])
 
-  // Auto-save to localStorage (debounced)
+  // Auto-save to backend (debounced)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const { history, historyIndex, ...dataToSave } = state
-      saveToStorage(dataToSave)
-    }, 1000)
+    if (!state.workshopId) return; // Don't save if no workshop is loaded
 
-    return () => clearTimeout(timer)
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const { history, historyIndex, workshopId, workshopTitle, ...dataToSave } = state
+
+        await workshopAPI.update(workshopId, {
+          data: {
+            version: '2.0.0',
+            timestamp: new Date().toISOString(),
+            data: dataToSave
+          },
+          currentStep: state.currentStep
+        })
+      } catch (error) {
+        console.error('Error saving workshop:', error)
+      }
+    }, 2000) // Save after 2 seconds of inactivity
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
   }, [state])
 
   return (
